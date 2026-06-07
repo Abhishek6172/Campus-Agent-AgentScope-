@@ -1,0 +1,23 @@
+tools:
+  get_fee_details:
+    keywords:
+      - fee
+      - fee details
+      - fee structure
+
+  get_fee_status:
+    keywords:
+      - fee status
+
+  get_pending_fee:
+    keywords:
+      - pending fee
+      - dues
+
+  get_salary:
+    keywords:
+      - salary
+
+  get_payroll:
+    keywords:
+      - payroll

@@ -1,0 +1,34 @@
+tools:
+  get_sgpa:
+    keywords:
+      - sgpa
+      - cgpa
+
+  get_results:
+    keywords:
+      - result
+      - semester result
+
+  get_timetable:
+    keywords:
+      - timetable
+      - schedule
+
+  get_attendance:
+    keywords:
+      - attendance
+
+  get_hostel_details:
+    keywords:
+      - hostel
+
+  get_leave_records:
+    keywords:
+      - leave
+      - leave records
+
+  get_academic_summary:
+    keywords:
+      - performance
+      - summary
+      - academic summary

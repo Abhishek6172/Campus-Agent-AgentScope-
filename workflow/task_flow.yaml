@@ -1,0 +1,34 @@
+routes:
+  profile:
+    keywords:
+      - student
+      - teacher
+      - profile
+      - email
+      - phone
+      - address
+      - subject
+      - course
+      - compare
+      - who is
+
+  academic:
+    keywords:
+      - sgpa
+      - cgpa
+      - semester
+      - result
+      - attendance
+      - timetable
+      - hostel
+      - leave
+      - performance
+
+  finance:
+    keywords:
+      - fee
+      - salary
+      - payroll
+      - payment
+      - pending
+      - dues

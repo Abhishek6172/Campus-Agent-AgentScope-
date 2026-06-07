@@ -1,0 +1,28 @@
+tools:
+  get_student_profile:
+    keywords:
+      - student
+      - student profile
+      - student details
+
+  get_teacher_profile:
+    keywords:
+      - teacher
+      - teacher profile
+      - teacher details
+
+  get_teacher_subject:
+    keywords:
+      - subject
+      - course
+      - teaches
+
+  get_public_person:
+    keywords:
+      - who is
+      - public person
+
+  compare_people:
+    keywords:
+      - compare
+      - comparison

@@ -1,0 +1,164 @@
+import re
+
+from utils.yaml_loader import YAMLLoader
+from tools.profile_tools import ProfileTools
+from tools.api_tools import APITools
+
+
+class ProfileAgent:
+
+    def __init__(self):
+
+        self.tools = ProfileTools()
+        self.api_tools = APITools()
+
+        self.planner = YAMLLoader.load_yaml(
+            "planners/profile_planner.yaml"
+        )
+
+    # -------------------------
+    # Extract IDs
+    # -------------------------
+
+    def extract_student_id(
+        self,
+        query
+    ):
+
+        match = re.search(
+            r"S\d+",
+            query,
+            re.IGNORECASE
+        )
+
+        if match:
+            return match.group().upper()
+
+        return None
+
+    def extract_teacher_id(
+        self,
+        query
+    ):
+
+        match = re.search(
+            r"T\d+",
+            query,
+            re.IGNORECASE
+        )
+
+        if match:
+            return match.group().upper()
+
+        return None
+
+    # -------------------------
+    # Main Reply
+    # -------------------------
+
+    def reply(
+        self,
+        query
+    ):
+
+        tool = YAMLLoader.get_tool(
+            query,
+            "planners/profile_planner.yaml"
+        )
+
+        if not tool:
+
+            return (
+                "ProfileAgent could not "
+                "find a suitable tool."
+            )
+
+        # -------------------------
+        # Student Profile
+        # -------------------------
+
+        if tool == "get_student_profile":
+
+            student_id = self.extract_student_id(
+                query
+            )
+
+            if student_id:
+
+                return self.tools.get_student_profile(
+                    student_id
+                )
+
+        # -------------------------
+        # Teacher Profile
+        # -------------------------
+
+        if tool == "get_teacher_profile":
+
+            teacher_id = self.extract_teacher_id(
+                query
+            )
+
+            if teacher_id:
+
+                return self.tools.get_teacher_profile(
+                    teacher_id
+                )
+
+        # -------------------------
+        # Teacher Subject
+        # -------------------------
+
+        if tool == "get_teacher_subject":
+
+            teacher_id = self.extract_teacher_id(
+                query
+            )
+
+            if teacher_id:
+
+                return self.tools.get_teacher_subject(
+                    teacher_id
+                )
+
+        # -------------------------
+        # Public Person
+        # -------------------------
+
+        if tool == "get_public_person":
+
+            name = (
+                query.lower()
+                .replace("who is", "")
+                .strip()
+            )
+
+            return self.tools.search_public_person(
+                name
+            )
+
+        # -------------------------
+        # Compare People
+        # -------------------------
+
+        if tool == "compare_people":
+
+            text = (
+                query.lower()
+                .replace("compare", "")
+                .strip()
+            )
+
+            names = text.split("and")
+
+            if len(names) == 2:
+
+                return self.tools.compare_people(
+                    names[0].strip(),
+                    names[1].strip()
+                )
+
+        return (
+            "ProfileAgent could not "
+            "process the query."
+        )
