@@ -55,14 +55,20 @@ class MongoDB:
     # Student
     # -------------------------
 
-    def get_student(self, student_id):
+    def get_student(
+        self,
+        student_id
+    ):
 
         return self.student.find_one(
             {"student_id": student_id},
             {"_id": 0}
         )
 
-    def get_student_by_name(self, name):
+    def get_student_by_name(
+        self,
+        name
+    ):
 
         return self.student.find_one(
             {
@@ -74,18 +80,72 @@ class MongoDB:
             {"_id": 0}
         )
 
+    def find_student(
+        self,
+        value
+    ):
+
+        student = self.get_student(
+            value
+        )
+
+        if student:
+            return student
+
+        return self.get_student_by_name(
+            value
+        )
+
+    def get_student_id_by_name(
+        self,
+        name
+    ):
+
+        student = self.get_student_by_name(
+            name
+        )
+
+        if not student:
+            return None
+
+        return student.get(
+            "student_id"
+        )
+
+    def get_student_name(
+        self,
+        student_id
+    ):
+
+        student = self.get_student(
+            student_id
+        )
+
+        if not student:
+            return None
+
+        return student.get(
+            "name"
+        )
+
     # -------------------------
     # Teacher
     # -------------------------
 
-    def get_teacher(self, teacher_id):
+    def get_teacher(
+        self,
+        teacher_id
+    ):
 
         return self.teachers.find_one(
             {"teacher_id": teacher_id},
             {"_id": 0}
         )
 
-    def get_teacher_by_name(self, name):
+    def get_teacher_by_name(
+        self,
+        name
+    ):
 
         return self.teachers.find_one(
             {
@@ -97,11 +157,46 @@ class MongoDB:
             {"_id": 0}
         )
 
+    def find_teacher(
+        self,
+        value
+    ):
+
+        teacher = self.get_teacher(
+            value
+        )
+
+        if teacher:
+            return teacher
+
+        return self.get_teacher_by_name(
+            value
+        )
+
+    def get_teacher_id_by_name(
+        self,
+        name
+    ):
+
+        teacher = self.get_teacher_by_name(
+            name
+        )
+
+        if not teacher:
+            return None
+
+        return teacher.get(
+            "teacher_id"
+        )
+
     # -------------------------
     # Results
     # -------------------------
 
-    def get_results(self, student_id):
+    def get_results(
+        self,
+        student_id
+    ):
 
         return list(
             self.semester_results.find(
@@ -114,7 +209,10 @@ class MongoDB:
     # Timetable
     # -------------------------
 
-    def get_timetable(self, department):
+    def get_timetable(
+        self,
+        department
+    ):
 
         return list(
             self.timetable.find(
@@ -168,7 +266,7 @@ class MongoDB:
         )
 
     # -------------------------
-    # Leave
+    # Leave Records
     # -------------------------
 
     def get_leave_records(

@@ -8,76 +8,52 @@ class AcademicTools:
         self.db = MongoDB()
 
     # -------------------------
-    # SGPA / CGPA
+    # Resolve Student
     # -------------------------
 
-    def get_sgpa(
+    def resolve_student_id(
         self,
-        student_id
+        student_id=None,
+        name=None
     ):
 
-        results = self.db.get_results(
-            student_id
-        )
+        if student_id:
+            return student_id
 
-        if not results:
-            return f"No result found for {student_id}"
+        if name:
 
-        return results
+            return (
+                self.db
+                .get_student_id_by_name(
+                    name
+                )
+            )
+
+        return None
 
     # -------------------------
-    # Semester Results
+    # Results
     # -------------------------
 
     def get_results(
         self,
-        student_id
+        student_id=None,
+        name=None
     ):
 
-        results = self.db.get_results(
-            student_id
-        )
-
-        if not results:
-            return f"No results found for {student_id}"
-
-        return results
-
-    # -------------------------
-    # Academic Summary
-    # -------------------------
-
-    def get_academic_summary(
-        self,
-        student_id
-    ):
-
-        results = self.db.get_results(
-            student_id
-        )
-
-        if not results:
-            return f"No records found for {student_id}"
-
-        total_sgpa = 0
-
-        for record in results:
-
-            total_sgpa += record.get(
-                "sgpa",
-                0
+        student_id = (
+            self.resolve_student_id(
+                student_id,
+                name
             )
-
-        average_sgpa = round(
-            total_sgpa / len(results),
-            2
         )
 
-        return {
-            "student_id": student_id,
-            "total_semesters": len(results),
-            "average_sgpa": average_sgpa
-        }
+        if not student_id:
+            return "Student not found"
+
+        return self.db.get_results(
+            student_id
+        )
 
     # -------------------------
     # Attendance
@@ -85,91 +61,68 @@ class AcademicTools:
 
     def get_attendance(
         self,
-        student_id
+        student_id=None,
+        name=None
     ):
 
-        attendance = self.db.get_attendance(
-            student_id
+        student_id = (
+            self.resolve_student_id(
+                student_id,
+                name
+            )
         )
 
-        if not attendance:
-            return f"No attendance found for {student_id}"
+        if not student_id:
+            return "Student not found"
 
-        return attendance
+        return self.db.get_attendance(
+            student_id
+        )
 
     # -------------------------
     # Hostel
     # -------------------------
 
-    def get_hostel_details(
+    def get_hostel(
         self,
-        student_id
+        student_id=None,
+        name=None
     ):
 
-        hostel = self.db.get_hostel(
+        student_id = (
+            self.resolve_student_id(
+                student_id,
+                name
+            )
+        )
+
+        if not student_id:
+            return "Student not found"
+
+        return self.db.get_hostel(
             student_id
         )
 
-        if not hostel:
-            return f"No hostel record found for {student_id}"
-
-        return hostel
-
     # -------------------------
-    # Leave Records
+    # Leave
     # -------------------------
 
     def get_leave_records(
         self,
-        student_id
+        student_id=None,
+        name=None
     ):
 
-        records = self.db.get_leave_records(
+        student_id = (
+            self.resolve_student_id(
+                student_id,
+                name
+            )
+        )
+
+        if not student_id:
+            return "Student not found"
+
+        return self.db.get_leave_records(
             student_id
         )
-
-        if not records:
-            return f"No leave records found for {student_id}"
-
-        return records
-
-    # -------------------------
-    # Timetable
-    # -------------------------
-
-    def get_timetable(
-        self,
-        department
-    ):
-
-        timetable = self.db.get_timetable(
-            department
-        )
-
-        if not timetable:
-            return f"No timetable found for {department}"
-
-        return timetable
-
-    # -------------------------
-    # Day Timetable
-    # -------------------------
-
-    def get_day_timetable(
-        self,
-        department,
-        day
-    ):
-
-        timetable = self.db.get_day_timetable(
-            department,
-            day
-        )
-
-        if not timetable:
-            return (
-                f"No timetable found for "
-                f"{department} on {day}"
-            )
-
-        return timetable

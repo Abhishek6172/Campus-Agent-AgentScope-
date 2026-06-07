@@ -13,29 +13,20 @@ class ProfileTools:
 
     def get_student_profile(
         self,
-        student_id
+        student_id=None,
+        name=None
     ):
 
-        student = self.db.get_student(
-            student_id
+        student = self.db.find_student(
+            student_id or name
         )
 
         if not student:
-            return f"Student {student_id} not found"
 
-        return student
-
-    def get_student_by_name(
-        self,
-        name
-    ):
-
-        student = self.db.get_student_by_name(
-            name
-        )
-
-        if not student:
-            return f"Student {name} not found"
+            return (
+                f"Student not found: "
+                f"{student_id or name}"
+            )
 
         return student
 
@@ -45,29 +36,20 @@ class ProfileTools:
 
     def get_teacher_profile(
         self,
-        teacher_id
+        teacher_id=None,
+        name=None
     ):
 
-        teacher = self.db.get_teacher(
-            teacher_id
+        teacher = self.db.find_teacher(
+            teacher_id or name
         )
 
         if not teacher:
-            return f"Teacher {teacher_id} not found"
 
-        return teacher
-
-    def get_teacher_by_name(
-        self,
-        name
-    ):
-
-        teacher = self.db.get_teacher_by_name(
-            name
-        )
-
-        if not teacher:
-            return f"Teacher {name} not found"
+            return (
+                f"Teacher not found: "
+                f"{teacher_id or name}"
+            )
 
         return teacher
 
@@ -77,24 +59,34 @@ class ProfileTools:
 
     def get_teacher_subject(
         self,
-        teacher_id
+        teacher_id=None,
+        name=None
     ):
 
-        teacher = self.db.get_teacher(
-            teacher_id
+        teacher = self.db.find_teacher(
+            teacher_id or name
         )
 
         if not teacher:
-            return f"Teacher {teacher_id} not found"
+
+            return (
+                f"Teacher not found: "
+                f"{teacher_id or name}"
+            )
 
         return {
-            "teacher_id": teacher.get(
+            "teacher_id":
+            teacher.get(
                 "teacher_id"
             ),
-            "name": teacher.get(
+
+            "name":
+            teacher.get(
                 "name"
             ),
-            "course": teacher.get(
+
+            "course":
+            teacher.get(
                 "course"
             )
         }
@@ -113,7 +105,10 @@ class ProfileTools:
         )
 
         if not person:
-            return f"{person_id} not found"
+
+            return (
+                f"{person_id} not found"
+            )
 
         return person
 
@@ -122,17 +117,23 @@ class ProfileTools:
         name
     ):
 
-        person = self.db.get_public_person_by_name(
-            name
+        person = (
+            self.db
+            .get_public_person_by_name(
+                name
+            )
         )
 
         if not person:
-            return f"{name} not found"
+
+            return (
+                f"{name} not found"
+            )
 
         return person
 
     # -------------------------
-    # Compare Public People
+    # Compare People
     # -------------------------
 
     def compare_people(
@@ -141,19 +142,31 @@ class ProfileTools:
         person_2
     ):
 
-        p1 = self.db.get_public_person_by_name(
-            person_1
+        p1 = (
+            self.db
+            .get_public_person_by_name(
+                person_1
+            )
         )
 
-        p2 = self.db.get_public_person_by_name(
-            person_2
+        p2 = (
+            self.db
+            .get_public_person_by_name(
+                person_2
+            )
         )
 
         if not p1:
-            return f"{person_1} not found"
+
+            return (
+                f"{person_1} not found"
+            )
 
         if not p2:
-            return f"{person_2} not found"
+
+            return (
+                f"{person_2} not found"
+            )
 
         return {
             "person_1": p1,
