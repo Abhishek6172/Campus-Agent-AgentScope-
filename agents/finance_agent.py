@@ -1,12 +1,17 @@
 import re
 
+from agentscope.agent import AgentBase
+from agentscope.message import Msg
+
 from utils.yaml_loader import YAMLLoader
 from tools.finance_tools import FinanceTools
 
 
-class FinanceAgent:
+class FinanceAgent(AgentBase):
 
     def __init__(self):
+
+        super().__init__()
 
         self.tools = FinanceTools()
 
@@ -55,13 +60,15 @@ class FinanceAgent:
         return None
 
     # -------------------------
-    # Main Reply
+    # AgentScope Reply
     # -------------------------
 
-    def reply(
+    async def reply(
         self,
-        query
-    ):
+        msg: Msg
+    ) -> Msg:
+
+        query = msg.content
 
         tool = YAMLLoader.get_tool(
             query,
@@ -70,10 +77,16 @@ class FinanceAgent:
 
         if not tool:
 
-            return (
-                "FinanceAgent could not "
-                "find a suitable tool."
+            return Msg(
+                name="FinanceAgent",
+                role="assistant",
+                content=(
+                    "FinanceAgent could not "
+                    "find a suitable tool."
+                )
             )
+
+        result = None
 
         # -------------------------
         # Fee Details
@@ -85,7 +98,7 @@ class FinanceAgent:
                 query
             )
 
-            return self.tools.get_fee_details(
+            result = self.tools.get_fee_details(
                 student_id
             )
 
@@ -93,13 +106,13 @@ class FinanceAgent:
         # Fee Status
         # -------------------------
 
-        if tool == "get_fee_status":
+        elif tool == "get_fee_status":
 
             student_id = self.extract_student_id(
                 query
             )
 
-            return self.tools.get_fee_status(
+            result = self.tools.get_fee_status(
                 student_id
             )
 
@@ -107,13 +120,13 @@ class FinanceAgent:
         # Pending Fee
         # -------------------------
 
-        if tool == "get_pending_fee":
+        elif tool == "get_pending_fee":
 
             student_id = self.extract_student_id(
                 query
             )
 
-            return self.tools.get_pending_fee(
+            result = self.tools.get_pending_fee(
                 student_id
             )
 
@@ -121,13 +134,13 @@ class FinanceAgent:
         # Salary
         # -------------------------
 
-        if tool == "get_salary":
+        elif tool == "get_salary":
 
             teacher_id = self.extract_teacher_id(
                 query
             )
 
-            return self.tools.get_salary(
+            result = self.tools.get_salary(
                 teacher_id
             )
 
@@ -135,17 +148,25 @@ class FinanceAgent:
         # Payroll
         # -------------------------
 
-        if tool == "get_payroll":
+        elif tool == "get_payroll":
 
             teacher_id = self.extract_teacher_id(
                 query
             )
 
-            return self.tools.get_payroll(
+            result = self.tools.get_payroll(
                 teacher_id
             )
 
-        return (
-            "FinanceAgent could not "
-            "process the query."
+        if result is None:
+
+            result = (
+                "FinanceAgent could not "
+                "process the query."
+            )
+
+        return Msg(
+            name="FinanceAgent",
+            role="assistant",
+            content=str(result)
         )

@@ -1,3 +1,6 @@
+from agentscope.agent import AgentBase
+from agentscope.message import Msg
+
 from utils.yaml_loader import YAMLLoader
 from utils.formatter import LLMFormatter
 
@@ -6,9 +9,11 @@ from agents.academic_agent import AcademicAgent
 from agents.finance_agent import FinanceAgent
 
 
-class CampusMasterAgent:
+class CampusMasterAgent(AgentBase):
 
     def __init__(self):
+
+        super().__init__()
 
         self.profile_agent = ProfileAgent()
 
@@ -31,46 +36,23 @@ class CampusMasterAgent:
         query
     ):
 
-        return YAMLLoader.get_worker(
+        worker = YAMLLoader.get_worker(
             query,
             "workflow/task_flow.yaml"
         )
 
+        return worker
+
     # --------------------------------
-    # Format Result
+    # AgentScope Reply
     # --------------------------------
 
-    def format_result(
+    async def reply(
         self,
-        query,
-        worker_name,
-        result
-    ):
+        msg: Msg
+    ) -> Msg:
 
-        try:
-
-            return self.llm_formatter.format_response(
-                query,
-                worker_name,
-                result
-            )
-
-        except Exception as e:
-
-            print(
-                f"\nLLM Formatting Failed: {e}"
-            )
-
-            return str(result)
-
-    # --------------------------------
-    # Main Reply
-    # --------------------------------
-
-    def reply(
-        self,
-        query
-    ):
+        query = msg.content
 
         worker = self.get_worker(
             query
@@ -78,11 +60,11 @@ class CampusMasterAgent:
 
         if not worker:
 
-            return {
-                "worker": "None",
-                "response":
-                "No worker found for this query."
-            }
+            return Msg(
+                name="CampusMasterAgent",
+                role="assistant",
+                content="No worker found for query."
+            )
 
         # -----------------------------
         # Profile Worker
@@ -90,65 +72,92 @@ class CampusMasterAgent:
 
         if worker == "profile":
 
-            result = (
-                self.profile_agent.reply(
-                    query
+            worker_msg = Msg(
+                name="Master",
+                role="user",
+                content=query
+            )
+
+            result = await self.profile_agent.reply(
+                worker_msg
+            )
+
+            formatted = (
+                self.llm_formatter.format_response(
+                    query,
+                    "ProfileAgent",
+                    result.content
                 )
             )
 
-            return {
-                "worker": "ProfileAgent",
-                "response": self.format_result(
-                    query,
-                    "ProfileAgent",
-                    result
-                )
-            }
+            return Msg(
+                name="CampusMasterAgent",
+                role="assistant",
+                content=formatted
+            )
 
         # -----------------------------
         # Academic Worker
         # -----------------------------
 
-        if worker == "academic":
+        elif worker == "academic":
 
-            result = (
-                self.academic_agent.reply(
-                    query
+            worker_msg = Msg(
+                name="Master",
+                role="user",
+                content=query
+            )
+
+            result = await self.academic_agent.reply(
+                worker_msg
+            )
+
+            formatted = (
+                self.llm_formatter.format_response(
+                    query,
+                    "AcademicAgent",
+                    result.content
                 )
             )
 
-            return {
-                "worker": "AcademicAgent",
-                "response": self.format_result(
-                    query,
-                    "AcademicAgent",
-                    result
-                )
-            }
+            return Msg(
+                name="CampusMasterAgent",
+                role="assistant",
+                content=formatted
+            )
 
         # -----------------------------
         # Finance Worker
         # -----------------------------
 
-        if worker == "finance":
+        elif worker == "finance":
 
-            result = (
-                self.finance_agent.reply(
-                    query
+            worker_msg = Msg(
+                name="Master",
+                role="user",
+                content=query
+            )
+
+            result = await self.finance_agent.reply(
+                worker_msg
+            )
+
+            formatted = (
+                self.llm_formatter.format_response(
+                    query,
+                    "FinanceAgent",
+                    result.content
                 )
             )
 
-            return {
-                "worker": "FinanceAgent",
-                "response": self.format_result(
-                    query,
-                    "FinanceAgent",
-                    result
-                )
-            }
+            return Msg(
+                name="CampusMasterAgent",
+                role="assistant",
+                content=formatted
+            )
 
-        return {
-            "worker": "Unknown",
-            "response":
-            "Unable to process request."
-        }
+        return Msg(
+            name="CampusMasterAgent",
+            role="assistant",
+            content="Unable to process request."
+        )

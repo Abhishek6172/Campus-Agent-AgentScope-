@@ -1,4 +1,7 @@
+import asyncio
 import agentscope
+
+from agentscope.message import Msg
 
 from agents.master_agent import CampusMasterAgent
 from database.mongodb import MongoDB
@@ -30,13 +33,33 @@ def startup():
     return True
 
 
+async def process_query(
+    master_agent,
+    query
+):
+
+    message = Msg(
+        name="user",
+        role="user",
+        content=query
+    )
+
+    response = await master_agent.reply(
+        message
+    )
+
+    return response
+
+
 def main():
 
     try:
+
         agentscope.init(
             project="CampusAgent"
         )
-    except:
+
+    except Exception:
         pass
 
     if not startup():
@@ -62,8 +85,9 @@ def main():
 
         try:
 
-            response = (
-                master_agent.reply(
+            response = asyncio.run(
+                process_query(
+                    master_agent,
                     query
                 )
             )
@@ -73,8 +97,7 @@ def main():
             )
 
             print(
-                f"Worker : "
-                f"{response['worker']}"
+                "Campus Agent Response"
             )
 
             print(
@@ -82,7 +105,7 @@ def main():
             )
 
             print(
-                response["response"]
+                response.content
             )
 
             print()
@@ -99,4 +122,5 @@ def main():
 
 
 if __name__ == "__main__":
+
     main()

@@ -1,12 +1,17 @@
 import re
 
+from agentscope.agent import AgentBase
+from agentscope.message import Msg
+
 from utils.yaml_loader import YAMLLoader
 from tools.academic_tools import AcademicTools
 
 
-class AcademicAgent:
+class AcademicAgent(AgentBase):
 
     def __init__(self):
+
+        super().__init__()
 
         self.tools = AcademicTools()
 
@@ -84,13 +89,15 @@ class AcademicAgent:
         return None
 
     # -------------------------
-    # Main Reply
+    # AgentScope Reply
     # -------------------------
 
-    def reply(
+    async def reply(
         self,
-        query
-    ):
+        msg: Msg
+    ) -> Msg:
+
+        query = msg.content
 
         tool = YAMLLoader.get_tool(
             query,
@@ -99,10 +106,16 @@ class AcademicAgent:
 
         if not tool:
 
-            return (
-                "AcademicAgent could not "
-                "find a suitable tool."
+            return Msg(
+                name="AcademicAgent",
+                role="assistant",
+                content=(
+                    "AcademicAgent could not "
+                    "find a suitable tool."
+                )
             )
+
+        result = None
 
         # -------------------------
         # SGPA
@@ -114,7 +127,7 @@ class AcademicAgent:
                 query
             )
 
-            return self.tools.get_sgpa(
+            result = self.tools.get_sgpa(
                 student_id
             )
 
@@ -122,13 +135,13 @@ class AcademicAgent:
         # Results
         # -------------------------
 
-        if tool == "get_results":
+        elif tool == "get_results":
 
             student_id = self.extract_student_id(
                 query
             )
 
-            return self.tools.get_results(
+            result = self.tools.get_results(
                 student_id
             )
 
@@ -136,13 +149,13 @@ class AcademicAgent:
         # Academic Summary
         # -------------------------
 
-        if tool == "get_academic_summary":
+        elif tool == "get_academic_summary":
 
             student_id = self.extract_student_id(
                 query
             )
 
-            return self.tools.get_academic_summary(
+            result = self.tools.get_academic_summary(
                 student_id
             )
 
@@ -150,13 +163,13 @@ class AcademicAgent:
         # Attendance
         # -------------------------
 
-        if tool == "get_attendance":
+        elif tool == "get_attendance":
 
             student_id = self.extract_student_id(
                 query
             )
 
-            return self.tools.get_attendance(
+            result = self.tools.get_attendance(
                 student_id
             )
 
@@ -164,27 +177,27 @@ class AcademicAgent:
         # Hostel
         # -------------------------
 
-        if tool == "get_hostel_details":
+        elif tool == "get_hostel_details":
 
             student_id = self.extract_student_id(
                 query
             )
 
-            return self.tools.get_hostel_details(
+            result = self.tools.get_hostel_details(
                 student_id
             )
 
         # -------------------------
-        # Leave
+        # Leave Records
         # -------------------------
 
-        if tool == "get_leave_records":
+        elif tool == "get_leave_records":
 
             student_id = self.extract_student_id(
                 query
             )
 
-            return self.tools.get_leave_records(
+            result = self.tools.get_leave_records(
                 student_id
             )
 
@@ -192,7 +205,7 @@ class AcademicAgent:
         # Timetable
         # -------------------------
 
-        if tool == "get_timetable":
+        elif tool == "get_timetable":
 
             department = self.extract_department(
                 query
@@ -204,16 +217,26 @@ class AcademicAgent:
 
             if day:
 
-                return self.tools.get_day_timetable(
+                result = self.tools.get_day_timetable(
                     department,
                     day
                 )
 
-            return self.tools.get_timetable(
-                department
+            else:
+
+                result = self.tools.get_timetable(
+                    department
+                )
+
+        if result is None:
+
+            result = (
+                "AcademicAgent could not "
+                "process the query."
             )
 
-        return (
-            "AcademicAgent could not "
-            "process the query."
+        return Msg(
+            name="AcademicAgent",
+            role="assistant",
+            content=str(result)
         )

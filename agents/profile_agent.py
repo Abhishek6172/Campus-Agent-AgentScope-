@@ -1,15 +1,21 @@
 import re
 
+from agentscope.agent import AgentBase
+from agentscope.message import Msg
+
 from utils.yaml_loader import YAMLLoader
 from tools.profile_tools import ProfileTools
 from tools.api_tools import APITools
 
 
-class ProfileAgent:
+class ProfileAgent(AgentBase):
 
     def __init__(self):
 
+        super().__init__()
+
         self.tools = ProfileTools()
+
         self.api_tools = APITools()
 
         self.planner = YAMLLoader.load_yaml(
@@ -110,142 +116,104 @@ class ProfileAgent:
         return query.strip()
 
     # -------------------------
-    # Main Reply
+    # AgentScope Reply
     # -------------------------
 
-    def reply(
+    async def reply(
         self,
-        query
-    ):
+        msg: Msg
+    ) -> Msg:
+
+        query = msg.content
 
         tool = YAMLLoader.get_tool(
             query,
             "planners/profile_planner.yaml"
         )
 
-        # Fallback
         if not tool:
 
             tool = "get_student_profile"
 
-        # -------------------------
-        # Student Profile
-        # -------------------------
+        result = None
 
         if tool == "get_student_profile":
 
-            student_id = (
-                self.extract_student_id(
-                    query
-                )
+            student_id = self.extract_student_id(
+                query
             )
 
             if student_id:
 
-                return (
-                    self.tools
-                    .get_student_profile(
-                        student_id=student_id
-                    )
+                result = self.tools.get_student_profile(
+                    student_id=student_id
                 )
 
-            name = self.extract_name(
-                query
-            )
+            else:
 
-            return (
-                self.tools
-                .get_student_profile(
-                    name=name
-                )
-            )
-
-        # -------------------------
-        # Teacher Profile
-        # -------------------------
-
-        if tool == "get_teacher_profile":
-
-            teacher_id = (
-                self.extract_teacher_id(
+                name = self.extract_name(
                     query
                 )
+
+                result = self.tools.get_student_profile(
+                    name=name
+                )
+
+        elif tool == "get_teacher_profile":
+
+            teacher_id = self.extract_teacher_id(
+                query
             )
 
             if teacher_id:
 
-                return (
-                    self.tools
-                    .get_teacher_profile(
-                        teacher_id=teacher_id
-                    )
+                result = self.tools.get_teacher_profile(
+                    teacher_id=teacher_id
                 )
 
-            name = self.extract_name(
-                query
-            )
+            else:
 
-            return (
-                self.tools
-                .get_teacher_profile(
-                    name=name
-                )
-            )
-
-        # -------------------------
-        # Teacher Subject
-        # -------------------------
-
-        if tool == "get_teacher_subject":
-
-            teacher_id = (
-                self.extract_teacher_id(
+                name = self.extract_name(
                     query
                 )
+
+                result = self.tools.get_teacher_profile(
+                    name=name
+                )
+
+        elif tool == "get_teacher_subject":
+
+            teacher_id = self.extract_teacher_id(
+                query
             )
 
             if teacher_id:
 
-                return (
-                    self.tools
-                    .get_teacher_subject(
-                        teacher_id=teacher_id
-                    )
+                result = self.tools.get_teacher_subject(
+                    teacher_id=teacher_id
                 )
 
-            name = self.extract_name(
-                query
-            )
+            else:
 
-            return (
-                self.tools
-                .get_teacher_subject(
+                name = self.extract_name(
+                    query
+                )
+
+                result = self.tools.get_teacher_subject(
                     name=name
                 )
-            )
 
-        # -------------------------
-        # Public Person
-        # -------------------------
-
-        if tool == "get_public_person":
+        elif tool == "get_public_person":
 
             name = self.extract_name(
                 query
             )
 
-            return (
-                self.tools
-                .search_public_person(
-                    name
-                )
+            result = self.tools.search_public_person(
+                name
             )
 
-        # -------------------------
-        # Compare People
-        # -------------------------
-
-        if tool == "compare_people":
+        elif tool == "compare_people":
 
             text = (
                 query.lower()
@@ -262,15 +230,20 @@ class ProfileAgent:
 
             if len(names) == 2:
 
-                return (
-                    self.tools
-                    .compare_people(
-                        names[0].strip(),
-                        names[1].strip()
-                    )
+                result = self.tools.compare_people(
+                    names[0].strip(),
+                    names[1].strip()
                 )
 
-        return (
-            "ProfileAgent could not "
-            "process the query."
+        if result is None:
+
+            result = (
+                "ProfileAgent could not "
+                "process the query."
+            )
+
+        return Msg(
+            name="ProfileAgent",
+            role="assistant",
+            content=str(result)
         )
